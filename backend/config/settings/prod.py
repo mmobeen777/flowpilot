@@ -1,0 +1,9 @@
+from .base import *
+
+DEBUG = env.bool('DEBUG', False)
+ALLOWED_HOSTS = env.str("DJANGO_ALLOWED_HOSTS", "").split(",")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
