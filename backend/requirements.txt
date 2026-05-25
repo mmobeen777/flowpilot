@@ -2,3 +2,5 @@ Django==4.2.30
 django-environ==0.13.0
 djangorestframework==3.16.0
 psycopg2-binary==2.9.12
+cuid==0.4
+django-charid-field=0.5

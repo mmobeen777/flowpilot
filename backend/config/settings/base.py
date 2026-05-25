@@ -14,7 +14,7 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env()
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", True)
@@ -44,7 +44,9 @@ THIRD_PARTY_APPS = [
     "rest_framework",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    "apps.user.apps.UserConfig"
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -60,6 +62,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
+AUTH_USER_MODEL = "user.User"
 
 TEMPLATES = [
     {
@@ -132,3 +135,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GDAL_LIBRARY_PATH = "/opt/homebrew/bin/gdalinfo"
+GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.13.0/lib/libgeos_c.1.19.0.dylib'
