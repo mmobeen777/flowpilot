@@ -1,5 +1,5 @@
-OWNER = 'owner'
-ADMIN = 'admin'
-MEMBER = 'member'
+USER_OWNER = 'owner'
+USER_ADMIN = 'admin'
+USER_MEMBER = 'member'
 
-ROLE_CHOICE = ((OWNER, OWNER), (ADMIN, ADMIN), (MEMBER, MEMBER), )
+

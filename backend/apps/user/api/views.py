@@ -1,3 +1,69 @@
-from django.shortcuts import render
+from django.contrib.auth import get_user_model
 
-# Create your views here.
+from rest_framework.response import Response
+from rest_framework import generics, permissions, status
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from ...utils.Permissions import IsAdminPermissionOrOwnerPermission, SameOrganizationPermission
+from .serializers import CreateUserSerializer, CreateMemberUserSerializer, ResetPasswordSerializer, UserSerializer,\
+    CustomTokenObtainPairSerializer
+
+User = get_user_model()
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class CreateView(generics.CreateAPIView):
+    serializer_class = CreateUserSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        data = UserSerializer(user).data
+
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class CreateMemberView(generics.CreateAPIView):
+    serializer_class = CreateMemberUserSerializer
+    permission_classes = [IsAdminPermissionOrOwnerPermission]
+
+    def create(self, request, *args, **kwargs):
+        user = self.request.user
+
+        data = request.data
+        if user.role == User.Role.OWNER:
+            data["org_id"] = user.organization.id
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        data = UserSerializer(user).data
+
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class DetailView(generics.RetrieveAPIView):
+    permission_classes = [SameOrganizationPermission]
+    serializer_class = UserSerializer
+    queryset = User.objects.filter(is_active=True)
+    lookup_field = "id"
+
+
+class PasswordResetView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ResetPasswordSerializer
+    http_method_names = ["patch"]
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        user.set_password(serializer.validated_data["new_password"])
+        user.save()
+
+

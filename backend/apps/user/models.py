@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from .manager import CustomManager
 from ..utils.Models import BaseModel
 from ..utils.Fields import CharIDField
-from ..utils.Constants import ROLE_CHOICE, MEMBER, OWNER, ADMIN
 
 
 class Organization(BaseModel):
@@ -28,6 +27,11 @@ class Organization(BaseModel):
 class User(AbstractBaseUser, PermissionsMixin):
     """This class represents the User model"""
 
+    class Role(models.TextChoices):
+        OWNER = "owner", "Owner"
+        ADMIN = "admin", "Admin"
+        MEMBER = "member", "Member"
+
     id = CharIDField(primary_key=True, prefix="usr_")
 
     first_name = models.CharField(max_length=255)
@@ -36,10 +40,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     password = models.CharField(max_length=255)
 
-    organisation = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True,
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True,
                                      related_name="members")
 
-    role = models.CharField(max_length=20, choices=ROLE_CHOICE, default=MEMBER)
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.MEMBER)
 
     is_superuser = models.BooleanField(
         default=False,
@@ -72,9 +76,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_owner(self):
         """Return True if the user has the OWNER role, otherwise False."""
-        return self.role == OWNER
+        return self.role == self.Role.OWNER
 
     @property
     def is_admin(self):
         """Return True if the user has the ADMIN role, otherwise False."""
-        return self.role == ADMIN
+        return self.role == self.Role.ADMIN
+
