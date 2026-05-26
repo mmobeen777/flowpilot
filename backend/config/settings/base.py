@@ -121,6 +121,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {},
+    "EXCEPTION_HANDLER": "apps.utils.ErrorHandling.fp_exception_handler",
 }
 
 
