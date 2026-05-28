@@ -14,7 +14,7 @@ class IsAuthenticated(permissions.IsAuthenticated):
         return super(IsAuthenticated, self).has_permission(request, view)
 
 
-class IsOwnerPermission(permissions.BasePermission):
+class IsOrgOwnerPermission(permissions.BasePermission):
     message = "Only owner accounts are able to access this"
 
     def has_permission(self, request, view):
@@ -24,17 +24,17 @@ class IsOwnerPermission(permissions.BasePermission):
         return request.user.role == User.Role.OWNER
 
 
-class IsAdminPermission(permissions.BasePermission):
+class IsOrgAdminPermission(permissions.BasePermission):
     message = "Only admin accounts are able to access this"
 
     def has_permission(self, request, view):
         if request.user.is_anonymous:
             return False
-
+        print(request.user.role)
         return request.user.role == User.Role.ADMIN
 
 
-class IsMemberPermission(permissions.BasePermission):
+class IsOrgMemberPermission(permissions.BasePermission):
     message = "Only member accounts are able to access this"
 
     def has_permission(self, request, view):
@@ -44,7 +44,7 @@ class IsMemberPermission(permissions.BasePermission):
         return request.user.role == User.Role.MEMBER
 
 
-class IsAdminPermissionOrOwnerPermission(permissions.BasePermission):
+class IsOrgAdminPermissionOrIsOrgOwnerPermission(permissions.BasePermission):
     message = "Only {} and {} accounts are able to access this".format(User.Role.OWNER,
                                                                        User.Role.ADMIN)
 

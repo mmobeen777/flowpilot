@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from ...utils.Permissions import IsAdminPermissionOrOwnerPermission, SameOrganizationPermission
-from .serializers import CreateUserSerializer, CreateMemberUserSerializer, ResetPasswordSerializer, UserSerializer,\
+from ...utils.Permissions import SameOrganizationPermission
+from .serializers import CreateUserSerializer, ResetPasswordSerializer, UserSerializer,\
     CustomTokenObtainPairSerializer
 
 User = get_user_model()
@@ -21,26 +21,6 @@ class CreateView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-
-        data = UserSerializer(user).data
-
-        return Response(data, status=status.HTTP_201_CREATED)
-
-
-class CreateMemberView(generics.CreateAPIView):
-    serializer_class = CreateMemberUserSerializer
-    permission_classes = [IsAdminPermissionOrOwnerPermission]
-
-    def create(self, request, *args, **kwargs):
-        user = self.request.user
-
-        data = request.data
-        if user.role == User.Role.OWNER:
-            data["org_id"] = user.organization.id
-
-        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 

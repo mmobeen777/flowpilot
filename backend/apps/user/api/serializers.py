@@ -78,33 +78,6 @@ class CreateUserSerializer(serializers.Serializer):
             raise exceptions.ValidationError("Unable to create user at this time.")
 
 
-class CreateMemberUserSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
-    first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150)
-    org_id = serializers.PrimaryKeyRelatedField(required=True,
-                                                queryset=Organization.objects.filter(is_active=True).all())
-
-    def validate_email(self, value):
-        if User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
-
-        return value.lower()
-
-    def create(self, validated_data):
-
-        user = User.objects.create_user(
-            email=validated_data["email"],
-            password=validated_data["password"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-            organization=validated_data["org_id"],
-            role=User.Role.MEMBER,
-        )
-        return user
-
-
 class ResetPasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)

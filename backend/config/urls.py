@@ -20,10 +20,12 @@ from django.urls import path, include
 
 APP_VERSION1 = "/v1"
 URL_USERS = APP_VERSION1 + "/users"
+URL_INVITATION = APP_VERSION1 + "/invitation"
 
 ROOT_URL = settings.APP_CONTEXT_ROOT
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(ROOT_URL + URL_USERS, include("apps.user.api.urls")),
+    path(ROOT_URL + URL_INVITATION, include("apps.invitations.api.urls")),
 ]
