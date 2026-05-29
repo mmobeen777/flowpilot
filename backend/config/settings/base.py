@@ -48,7 +48,8 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "apps.user.apps.UserConfig",
-    "apps.invitations.apps.InvitationsConfig"
+    "apps.invitations.apps.InvitationsConfig",
+    "apps.apikeys.apps.ApikeysConfig"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -95,7 +96,7 @@ DATABASES = {
         'NAME': env.str('DB_NAME'),
         'USER': env.str('DB_USER'),
         'PASSWORD': env.str('DB_PASSWORD'),
-        'HOST': env.str('DB_HOST_WRITER'),
+        'HOST': env.str('DB_HOST'),
         'PORT': env.int('DB_DATABASE_PORT'),
     },
 }
