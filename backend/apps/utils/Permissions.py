@@ -5,6 +5,19 @@ from rest_framework import permissions
 User = get_user_model()
 
 
+class IsAPIKeyAuthenticated(permissions.BasePermission):
+    """
+    Passes only when the request was authenticated via API key,
+    not JWT. Use on endpoints that should only be hit by API clients.
+    """
+
+    def has_permission(self, request, view):
+
+        if request.user.is_anonymous:
+            return False
+        return isinstance(request.auth, __import__("apps.apikeys.models", fromlist=["APIKey"]).APIKey)
+
+
 # Allow web browsers to query authenticated endpoints for OPTIONS without passing in authentication headers
 class IsAuthenticated(permissions.IsAuthenticated):
 
