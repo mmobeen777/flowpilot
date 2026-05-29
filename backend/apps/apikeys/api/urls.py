@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import APIKeyViewSet
 
 router = DefaultRouter()
-router.register(r"keys/", APIKeyViewSet, basename="apikey")
+router.register(r"", APIKeyViewSet, basename="apikey")
 
 urlpatterns = [
     path("", include(router.urls)),
