@@ -1,7 +1,7 @@
 from rest_framework.views import exception_handler
 from rest_framework.exceptions import Throttled
 from rest_framework_simplejwt.exceptions import InvalidToken
-from .FlowPilotErrors import FlowPilotError
+from backend.apps.utils.core.FlowPilotErrors import FlowPilotError
 
 
 def fp_exception_handler(exc, context):

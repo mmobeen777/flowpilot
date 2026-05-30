@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from ...utils.Permissions import SameOrganizationPermission
+from backend.apps.utils.core.Permissions import SameOrganizationPermission
 from .serializers import CreateUserSerializer, ResetPasswordSerializer, UserSerializer,\
     CustomTokenObtainPairSerializer
 

@@ -111,7 +111,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
-    "TOKEN_OBTAIN_SERIALIZER": "apps.accounts.serializers.CustomTokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "apps.user.api.serializers.CustomTokenObtainPairSerializer",
 }
 
 REST_FRAMEWORK = {
@@ -124,7 +124,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {},
-    "EXCEPTION_HANDLER": "apps.utils.ErrorHandling.fp_exception_handler",
+    "EXCEPTION_HANDLER": "apps.utils.core.ErrorHandling.fp_exception_handler",
 }
 
 
@@ -169,3 +169,109 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ENABLE_SQL_LOGGING = env.bool("ENABLE_SQL_LOGGING", False)
+LOG_DIRECTORY = Path(env.str("LOG_DIRECTORY", "logs"))
+LOG_DIRECTORY.mkdir(parents=True, exist_ok=True)
+INFO_LOG_FILE_SIZE = env.int("INFO_LOG_FILE_SIZE", 15)
+INFO_LOG_FILE_ROTATIONS = env.int("INFO_LOG_FILE_ROTATIONS", 5)
+ERROR_LOG_FILE_SIZE = env.int("ERROR_LOG_FILE_SIZE", 15)
+ERROR_LOG_FILE_ROTATIONS = env.int("ERROR_LOG_FILE_ROTATIONS", 5)
+ROTATING_FILE_HANDLER = "logging.handlers.RotatingFileHandler"
+DEBUG_LOG_FILE_SIZE = env.int("DEBUG_LOG_FILE_SIZE", 15)
+DEBUG_LOG_FILE_ROTATIONS = env.int("DEBUG_LOG_FILE_ROTATIONS", 5)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'slow_queries': {
+            '()': 'apps.utils.core.query_logger.SlowQueriesFilter',
+            # 'callback': lambda record: len(record.name) > 0  # output slow queries only
+        },
+    },
+    'formatters': {
+        'default': {
+            'format': '[%(asctime)s] [%(levelname)s] [%(pathname)s:%(lineno)d] [%(process)d:%(thread)d]: [%(message)s]'
+        }
+    },
+    'handlers': {
+        'sql_logs': {
+            'level': 'DEBUG',
+            'class': ROTATING_FILE_HANDLER,
+            'filename': LOG_DIRECTORY / 'sql.log',
+            'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
+            'backupCount': DEBUG_LOG_FILE_ROTATIONS,
+            'formatter': 'default',
+            'filters': ['slow_queries'],
+        },
+        'console': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        },
+        'debug_files': {
+            'level': 'DEBUG',
+            'class': ROTATING_FILE_HANDLER,
+            'formatter': 'default',
+            'filename': LOG_DIRECTORY / 'debug.log',
+            'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
+            'backupCount': DEBUG_LOG_FILE_ROTATIONS,
+            'mode': 'a',
+        },
+        'info_files': {
+            'level': 'INFO',
+            'class': ROTATING_FILE_HANDLER,
+            'formatter': 'default',
+            'filename': LOG_DIRECTORY / 'info.log',
+            'maxBytes': INFO_LOG_FILE_SIZE * 1024 * 1024,
+            'backupCount': INFO_LOG_FILE_ROTATIONS,
+            'mode': 'a',
+        },
+        'error_files': {
+            'level': 'WARNING',
+            'class': ROTATING_FILE_HANDLER,
+            'formatter': 'default',
+            'filename': LOG_DIRECTORY / 'error.log',
+            'maxBytes': ERROR_LOG_FILE_SIZE * 1024 * 1024,
+            'backupCount': ERROR_LOG_FILE_ROTATIONS,
+            'mode': 'a',
+        },
+        'request_files': {
+            'level': 'DEBUG',
+            'class': ROTATING_FILE_HANDLER,
+            'formatter': 'default',
+            'filename': LOG_DIRECTORY / 'requests.log',
+            'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
+            'backupCount': DEBUG_LOG_FILE_ROTATIONS,
+            'mode': 'a',
+        }
+    },
+    'root': {'level': 'DEBUG', 'handlers': ['console', 'error_files', 'request_files', 'sql_logs']},
+    'loggers': {
+        'django': {
+            'level': 'WARNING',
+            'handlers': ['console', 'error_files'],
+            'propagate': False,
+        },
+        'django.server': {
+            'level': 'WARNING',
+            'handlers': ['console', 'error_files'],
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'DEBUG' if ENABLE_SQL_LOGGING else 'WARNING',
+            'handlers': ['sql_logs'],
+            'propagate': False,
+        },
+        'django.security.*': {
+            'level': 'WARNING',
+            'handlers': ['console', 'error_files'],
+            'propagate': False,
+        },
+        'django.security.csrf': {
+            'level': 'WARNING',
+            'handlers': ['console', 'error_files'],
+            'propagate': False,
+        },
+    },
+}
