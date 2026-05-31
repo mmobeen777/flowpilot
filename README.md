@@ -33,11 +33,6 @@ cd flowpilot
 
 ### 2. Set up environment variables
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and fill in the required values (see [Environment Variables](#environment-variables) below).
 
 ### 3. Start the stack
 
