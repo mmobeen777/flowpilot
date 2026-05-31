@@ -185,7 +185,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'filters': {
         'slow_queries': {
-            '()': 'apps.utils.core.query_logger.SlowQueriesFilter',
+            '()': 'apps.utils.core.QueryLogger.SlowQueriesFilter',
             # 'callback': lambda record: len(record.name) > 0  # output slow queries only
         },
     },

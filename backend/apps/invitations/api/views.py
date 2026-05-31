@@ -6,7 +6,7 @@ from ..models import Invitation
 from .serializers import InvitationCreateSerializer, InvitationAcceptSerializer, InvitationSerializer
 
 from ...user.api.serializers import UserSerializer
-from backend.apps.utils.core.Permissions import IsOrgAdminPermissionOrIsOrgOwnerPermission
+from apps.utils.core.Permissions import IsOrgAdminPermissionOrIsOrgOwnerPermission
 
 
 class InvitationListCreateView(generics.ListCreateAPIView):

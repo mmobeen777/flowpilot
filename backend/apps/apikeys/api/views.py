@@ -7,7 +7,7 @@ from rest_framework import viewsets, status, exceptions
 from ..models import APIKey
 from .serializers import APIKeySerializer, APIKeyCreateSerializer, APIKeyCreatedSerializer, APIKeyUpdateSerializer
 
-from backend.apps.utils.core.Permissions import IsAuthenticated, IsAPIKeyAuthenticated,\
+from apps.utils.core.Permissions import IsAuthenticated, IsAPIKeyAuthenticated,\
     IsOrgAdminPermissionOrIsOrgOwnerPermission
 
 
