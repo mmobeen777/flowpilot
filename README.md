@@ -78,7 +78,20 @@ flowpilot/
         ├── invitation/    # Invite flow
         ├── apikeys/        # API key model, custom auth backend
         ├── metering/       # Redis middleware, UsageRecord
-        └──billing/        # Plans, Subscriptions, Stripe sync
+        ├── billing/        # Plans, Subscriptions, Stripe sync
+        └── utils/
+                ├── core/    # core utils for project like permissions, custom error handling etc
+                    ├── Counter.py
+                    ├── ErrorHandling.py
+                    ├── FlowPilotErrors.py
+                    ├── Middleware.py
+                    ├── Permissions.py
+                    └── QueryLogger.py
+                ├── Constants.py
+                ├── Fields.py
+                └── Models.py
+                
+            
 ```
 
 ---
