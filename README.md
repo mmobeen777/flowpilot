@@ -6,7 +6,7 @@ API gateway and usage metering SaaS built with Django REST Framework. Teams crea
 
 ## Tech Stack
 
-- **Backend** — Django 5, Django REST Framework
+- **Backend** — Django 4, Django REST Framework
 - **Auth** — JWT (simplejwt) + custom API key authentication
 - **Database** — PostgreSQL 16
 - **Cache / Broker** — Redis 7
