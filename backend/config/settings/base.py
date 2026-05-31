@@ -50,7 +50,8 @@ LOCAL_APPS = [
     "apps.user.apps.UserConfig",
     "apps.invitations.apps.InvitationsConfig",
     "apps.apikeys.apps.ApikeysConfig",
-    "apps.metering.apps.MeteringConfig"
+    "apps.metering.apps.MeteringConfig",
+    "apps.billing.apps.BillingConfig"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
