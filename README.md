@@ -50,12 +50,6 @@ On first boot, migrations run automatically and static files are collected.
 docker compose exec web python manage.py createsuperuser
 ```
 
-### 5. Open the API docs
-
-```
-http://localhost/api/docs/
-```
-
 ---
 
 ## Project Structure
