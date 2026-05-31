@@ -75,3 +75,35 @@ class SameOrganizationPermission(permissions.BasePermission):
         if request.user.role == User.Role.ADMIN:
             return True
         return request.user.role == User.Role.OWNER and obj.organization == request.user.organization
+
+
+class HasFeature(permissions.BasePermission):
+    """
+    Usage:
+        class MyView(APIView):
+            permission_classes = [IsAuthenticated, HasFeature("can_use_webhooks")]
+    """
+
+    def __init__(self, feature: str):
+        self.feature = feature
+
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return False
+
+        try:
+            subscription = request.user.organization.subscription
+        except AttributeError:
+            return False
+
+        if not subscription.is_active:
+            return False
+
+        return subscription.has_feature(self.feature)
+
+    def message(self):
+        return (
+            f"Your current plan does not include this feature. "
+            f"Upgrade to access it."
+        )
+    
