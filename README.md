@@ -13,7 +13,6 @@ API gateway and usage metering SaaS built with Django REST Framework. Teams crea
 - **Task Queue** — Celery + Celery Beat
 - **Billing** — Stripe metered billing
 - **Email** — Resend
-- **Docs** — drf-spectacular (OpenAPI / Swagger)
 - **Infrastructure** — Docker, Docker Compose, Nginx, Gunicorn
 
 ---
