@@ -57,8 +57,7 @@ docker compose exec web python manage.py createsuperuser
 ```
 flowpilot/
 ├── docker-compose.yml
-├── docker-compose.override.yml
-├── .env.example
+├── .env
 ├── nginx/
 │   └── default.conf
 └── backend/
@@ -75,12 +74,11 @@ flowpilot/
     │   ├── wsgi.py
     │   └── celery.py
     └── apps/
-        ├── accounts/       # User, Organisation, JWT auth
-        ├── invitations/    # Invite flow
+        ├── user/       # User, Organisation, JWT auth
+        ├── invitation/    # Invite flow
         ├── apikeys/        # API key model, custom auth backend
         ├── metering/       # Redis middleware, UsageRecord
-        ├── billing/        # Plans, Subscriptions, Stripe sync
-        └── analytics/      # Usage stats endpoints
+        └──billing/        # Plans, Subscriptions, Stripe sync
 ```
 
 ---
@@ -91,42 +89,43 @@ flowpilot/
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/auth/register/` | Create org + owner account |
-| POST | `/api/auth/token/` | Login, get JWT tokens |
-| POST | `/api/auth/token/refresh/` | Refresh access token |
-| POST | `/api/auth/token/logout/` | Blacklist refresh token |
-| GET / PATCH | `/api/auth/me/` | Get or update own profile |
+| POST | `/flowpilot/api/v1/users/register` | Create org + owner account |
+| POST | `/flowpilot/api/v1/users/login` | Login, get JWT tokens |
+| POST | `/flowpilot/api/v1/users/refresh-token` | Refresh access token |
+| POST | `/flowpilot/api/v1/users/logout` | Blacklist refresh token |
 
 ### Invitations
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET / POST | `/api/invitations/` | List or send invitations (admin+) |
-| POST | `/api/invitations/accept/` | Accept an invitation |
+| GET / POST | `/flowpilot/api/v1/invitation` | List or send invitations (admin+) |
+| POST | `/flowpilot/api/v1/invitation/accept` | Accept an invitation |
+| GET | `/flowpilot/api/v1/invitation/retrieve/{id}` | Retrieve an invitation |
 
-### API Keys *(Day 3)*
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET / POST | `/api/keys/` | List or create API keys |
-| DELETE | `/api/keys/{id}/` | Revoke a key |
-| POST | `/api/keys/{id}/rotate/` | Rotate a key |
-
-### Billing *(Days 6–8)*
+### API Keys
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/plans/` | List available plans |
-| POST | `/api/subscriptions/` | Subscribe org to a plan |
-| POST | `/api/subscriptions/upgrade/` | Upgrade or downgrade plan |
-| POST | `/api/webhooks/stripe/` | Stripe event receiver |
+| GET / POST | `/flowpilot/api/v1/key` | List or create API keys |
+| DELETE | `/flowpilot/api/v1/key/{id}` | Revoke a key |
+| POST | `/flowpilot/api/v1/key/{id}/rotate` | Rotate a key |
+| GET | `/flowpilot/api/v1/key/verify` | Verify a key |
 
-### Analytics *(Day 10)*
+### Billing 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/analytics/usage/` | Call volume this month, by day |
-| GET | `/api/analytics/quota/` | Current usage vs plan limit |
+| GET | `/flowpilot/api/v1/plans` | List available plans |
+| POST | `/flowpilot/api/v1/subscriptions/` | Subscribe org to a plan |
+| POST | `/flowpilot/api/v1/subscriptions/upgrade` | Upgrade or downgrade plan |
+| POST | `/flowpilot/api/v1//webhooks/stripe` | Stripe event receiver |
+
+### Analytics
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/flowpilot/api/v1/analytics/usage/` | Call volume this month, by day |
+| GET | `/flowpilot/api/v1/analytics/quota/` | Current usage vs plan limit |
 
 ---
 
