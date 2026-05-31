@@ -24,6 +24,7 @@ APP_VERSION1 = "/v1"
 URL_USERS = APP_VERSION1 + "/users"
 URL_INVITATION = APP_VERSION1 + "/invitation"
 URL_API_KEY = APP_VERSION1 + "/key"
+URL_METERING = APP_VERSION1 + "/analytics"
 
 
 urlpatterns = [
@@ -31,4 +32,5 @@ urlpatterns = [
     path(ROOT_URL + URL_USERS, include("apps.user.api.urls")),
     path(ROOT_URL + URL_INVITATION, include("apps.invitations.api.urls")),
     path(ROOT_URL + URL_API_KEY, include("apps.apikeys.api.urls")),
+    path(ROOT_URL + URL_METERING, include("apps.metering.api.urls")),
 ]

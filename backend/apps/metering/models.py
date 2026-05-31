@@ -8,7 +8,7 @@ from ..utils.Fields import CharIDField
 class UsageRecord(BaseModel):
 
     id = CharIDField(primary_key=True, prefix="usg_")
-    organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="usage_records")
+    organization = models.ForeignKey("user.Organization", on_delete=models.CASCADE, related_name="usage_records")
 
     date = models.DateField()
     call_count = models.PositiveIntegerField(default=0)
@@ -37,4 +37,3 @@ class UsageRecord(BaseModel):
             defaults={"call_count": models.F("call_count") + count},
         )
         return obj
-    
