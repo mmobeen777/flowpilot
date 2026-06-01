@@ -106,4 +106,3 @@ class HasFeature(permissions.BasePermission):
             f"Your current plan does not include this feature. "
             f"Upgrade to access it."
         )
-    
