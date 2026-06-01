@@ -80,7 +80,7 @@ flowpilot/
         ├── metering/       # Redis middleware, UsageRecord
         ├── billing/        # Plans, Subscriptions, Stripe sync
         └── utils/
-                ├── core/    # core utils for project like permissions, custom error handling etc
+                ├── core/    # core utils for project like permissions, custom error_handling etc
                     ├── Counter.py
                     ├── ErrorHandling.py
                     ├── FlowPilotErrors.py
