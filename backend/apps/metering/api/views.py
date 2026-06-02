@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from rest_framework import exceptions
+from rest_framework import status, exceptions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -37,27 +37,38 @@ class UsageView(APIView):
             "today": today_live,
             "this_month": month_live,
             "daily_breakdown": daily,
-        })
+        }, status=status.HTTP_200_OK)
 
 
 class QuotaView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        org = request.user.organization
+        org = request.user.organisation
         if not org:
-            raise exceptions.ValidationError("User has no organization.")
+            raise exceptions.ValidationError("No organisation found.")
+
+        try:
+            subscription = org.subscription
+            plan = subscription.plan
+        except Exception:
+            raise exceptions.ValidationError("No active subscription.")
 
         month_used = get_month_count(str(org.id))
-
-        plan_limit = getattr(getattr(org, "subscription", None), "plan", None)
-
-        limit = plan_limit.monthly_call_limit if plan_limit else None
+        limit = plan.monthly_call_limit
 
         return Response({
+            "plan": plan.name,
+            "tier": plan.tier,
             "used": month_used,
             "limit": limit,
-            "unlimited": limit is None,
+            "unlimited": plan.is_unlimited,
             "percent": round((month_used / limit) * 100, 1) if limit else None,
-        })
+            "max_api_keys": plan.max_api_keys,
+            "max_members": plan.max_members,
+            "features": {
+                "webhooks": plan.can_use_webhooks,
+                "analytics": plan.can_use_analytics,
+                "export": plan.can_export_data,
+            },
+        }, status=status.HTTP_200_OK)

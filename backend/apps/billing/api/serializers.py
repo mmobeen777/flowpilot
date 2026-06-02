@@ -39,4 +39,3 @@ class SubscriptionUpgradeSerializer(serializers.Serializer):
                 f"No active plan found for tier '{value}'."
             )
         return value
-    
