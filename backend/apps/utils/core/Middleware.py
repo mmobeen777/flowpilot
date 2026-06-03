@@ -2,7 +2,7 @@ import logging
 from django.conf import settings
 
 from apps.utils.core.Counter import get_month_count, increment_usage
-from backend.apps.utils.core.ErrorHandling import QuotaExceeded, SubscriptionInactive
+from apps.utils.core.ErrorHandling import QuotaExceeded, SubscriptionInactive
 
 logger = logging.getLogger(__name__)
 

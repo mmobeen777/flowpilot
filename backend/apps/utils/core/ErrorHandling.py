@@ -2,7 +2,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.views import exception_handler
 from rest_framework.exceptions import Throttled
 from rest_framework_simplejwt.exceptions import InvalidToken
-from backend.apps.utils.core.FlowPilotErrors import FlowPilotError
+from apps.utils.core.FlowPilotErrors import FlowPilotError
 
 
 class QuotaExceeded(APIException):

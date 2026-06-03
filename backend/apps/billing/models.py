@@ -68,6 +68,7 @@ class Subscription(BaseModel):
 
     stripe_customer_id = models.CharField(max_length=100, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True)
+    stripe_subscription_item_id = models.CharField(max_length=100, blank=True)
 
     current_period_start = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True, blank=True)

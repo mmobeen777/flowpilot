@@ -22,6 +22,7 @@ PLANS = [
         "can_use_webhooks": True,
         "can_use_analytics": False,
         "can_export_data": False,
+        "stripe_price_id": "price_1TeGom0apCLtFQSEPTqZ8PtZ"  # should be in env maybe later
     },
     {
         "name": "Pro",
@@ -32,6 +33,7 @@ PLANS = [
         "can_use_webhooks": True,
         "can_use_analytics": True,
         "can_export_data": True,
+        "stripe_price_id": "price_1TeG7A0apCLtFQSERazrLHk0"
     },
     {
         "name": "Enterprise",
@@ -42,6 +44,7 @@ PLANS = [
         "can_use_webhooks": True,
         "can_use_analytics": True,
         "can_export_data": True,
+        "stripe_price_id": "price_1TeGpe0apCLtFQSEXlqUYqw0"
     },
 ]
 
