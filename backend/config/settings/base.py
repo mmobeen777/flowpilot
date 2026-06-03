@@ -173,6 +173,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+STRIPE_SECRET_KEY = env.str("STRIPE_SECRET_KEY", "")
+# STRIPE_WEBHOOK_SECRET = env.str("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_API_VERSION = "2024-06-20"
+
 ENABLE_SQL_LOGGING = env.bool("ENABLE_SQL_LOGGING", False)
 LOG_DIRECTORY = Path(env.str("LOG_DIRECTORY", "logs"))
 LOG_DIRECTORY.mkdir(parents=True, exist_ok=True)
