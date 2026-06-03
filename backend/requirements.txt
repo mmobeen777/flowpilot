@@ -7,3 +7,4 @@ django-charid-field==0.5
 djangorestframework_simplejwt==5.5.1
 gunicorn==26.0.0
 redis==7.0.1
+stripe==15.2.0
