@@ -173,11 +173,22 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Celery
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
+
+# Stripe
 STRIPE_SECRET_KEY = env.str("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = env.str("STRIPE_WEBHOOK_SECRET", "")
 STRIPE_API_VERSION = "2024-06-20"
 
+# Logging
 ENABLE_SQL_LOGGING = env.bool("ENABLE_SQL_LOGGING", False)
 LOG_DIRECTORY = Path(env.str("LOG_DIRECTORY", "logs"))
 LOG_DIRECTORY.mkdir(parents=True, exist_ok=True)

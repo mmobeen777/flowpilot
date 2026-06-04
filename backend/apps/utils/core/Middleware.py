@@ -12,7 +12,8 @@ EXCLUDED_PREFIXES = (
     root_path + "v1/users",
     root_path + "v1/invitation",
     root_path + "v1/key",
-    root_path + "v1/analytics"
+    root_path + "v1/analytics",
+    root_path + "v1/billing"
     "/static/",
 )
 
@@ -92,7 +93,7 @@ class UsageMeteringMiddleware:
         used = get_month_count(str(user.organization_id))
 
         if used >= limit:
-            raise QuotaExceeded(used=used, limit=limit, upgrade_url=root_path + "v1/billing/plans")
+            raise QuotaExceeded(used=used, limit=limit, upgrade_url="https://" + root_path + "v1/billing/plans")
 
         return None
 

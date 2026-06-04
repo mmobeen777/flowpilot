@@ -45,6 +45,44 @@ services:
       redis:
         condition: service_healthy
 
+  worker:
+    build: ./backend
+    command: celery -A config.celery worker --loglevel=info --concurrency=2
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    beat:
+      build: ./backend
+      command: celery -A config.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      volumes:
+        - ./backend:/app
+      env_file:
+        - .env
+      environment:
+        - POSTGRES_HOST=db
+        - POSTGRES_PORT=5432
+        - REDIS_HOST=redis
+        - REDIS_PORT=6379
+        - DJANGO_SETTINGS_MODULE=config.settings.dev
+      depends_on:
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+
 
   nginx:
     image: nginx:alpine
