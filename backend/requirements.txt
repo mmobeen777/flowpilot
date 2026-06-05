@@ -10,3 +10,4 @@ redis==7.0.1
 stripe==15.2.0
 celery==5.4.0
 django-celery-beat==2.7.0
+django-redis==6.0.0
