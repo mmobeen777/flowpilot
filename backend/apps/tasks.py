@@ -165,3 +165,61 @@ def monthly_usage_rollup():
             logger.info("Monthly rollup: %d calls for org %s (%s)", count, org.name, month_str)
         except Organization.DoesNotExist:
             continue
+
+
+@shared_task(
+    name="analytics.generate_export",
+    bind=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def generate_export(self, export_id: str):
+    """
+    Background task — builds the export file and writes it back
+    to the Export row. The HTTP polling endpoint checks status.
+    """
+    from apps.stats.models import Export
+    from apps.stats.api.exports import build_csv, build_json
+
+    try:
+        export = Export.objects.select_related("organisation").get(id=export_id)
+    except Export.DoesNotExist:
+        logger.error("Export %s not found", export_id)
+        return
+
+    export.status = Export.Status.PROCESSING
+    export.save(update_fields=["status"])
+
+    try:
+        org = export.organisation
+
+        if export.format == Export.Format.CSV:
+            content, row_count = build_csv(org, export.date_from, export.date_to)
+            file_name = f"{org.slug}_usage_{export.date_from}_{export.date_to}.csv"
+        else:
+            content, row_count = build_json(org, export.date_from, export.date_to)
+            file_name = f"{org.slug}_usage_{export.date_from}_{export.date_to}.json"
+
+        # In real project send email instead of polling, maybe later for this too
+        export.file_content = content
+        export.file_name = file_name
+        export.row_count = row_count
+        export.status = Export.Status.COMPLETE
+        export.completed_at = timezone.now()
+        export.save(update_fields=[
+            "file_content", "file_name", "row_count",
+            "status", "completed_at",
+        ])
+
+        logger.info(
+            "Export %s complete — %d rows, %d bytes",
+            export_id, row_count, len(content),
+        )
+
+    except Exception as exc:
+        logger.error("Export %s failed: %s", export_id, exc)
+        export.status = Export.Status.FAILED
+        export.error_message = str(exc)
+        export.save(update_fields=["status", "error_message"])
+        raise self.retry(exc=exc)
+
