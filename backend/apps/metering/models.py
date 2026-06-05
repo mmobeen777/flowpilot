@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 from ..utils.Models import BaseModel
 from ..utils.Fields import CharIDField
@@ -30,9 +30,18 @@ class UsageRecord(BaseModel):
         Upsert a usage record for a given org and date.
         Uses update_or_create so re-running the flush is safe (idempotent).
         """
-        obj, created = cls.objects.update_or_create(
-            organization=org,
-            date=date,
-            defaults={"call_count": models.F("call_count") + count},
-        )
+        with transaction.atomic():
+            obj, created = cls.objects.get_or_create(
+                organization=org,
+                date=date,
+                defaults={"call_count": count},
+            )
+
+            if not created:
+                cls.objects.filter(pk=obj.pk).update(
+                    call_count=models.F("call_count") + count
+                )
+            obj.refresh_from_db()
+
         return obj
+

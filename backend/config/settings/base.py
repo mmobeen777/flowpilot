@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-from datetime import timedelta
-from pathlib import Path
 import environ
+from pathlib import Path
+from datetime import timedelta
+
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -44,6 +46,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "django_celery_beat"
 ]
 
 LOCAL_APPS = [
@@ -51,7 +54,8 @@ LOCAL_APPS = [
     "apps.invitations.apps.InvitationsConfig",
     "apps.apikeys.apps.ApikeysConfig",
     "apps.metering.apps.MeteringConfig",
-    "apps.billing.apps.BillingConfig"
+    "apps.billing.apps.BillingConfig",
+    "apps.stats.apps.StatsConfig"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -182,6 +186,21 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
+REDIS_URL = env.str("REDIS_URL")
+
+CELERY_BEAT_SCHEDULE = {
+    "flush-usage-and-report-nightly": {
+        "task": "flush_usage_and_report",
+        "schedule": crontab(hour="0", minute="5"),
+        "options": {"expires": 3600}
+    },
+    "monthly-usage-rollup": {
+        "task": "monthly_usage_rollup",
+        "schedule": crontab(day_of_month="1", hour="1", minute="0"),
+        "options": {"expires": 7200}
+    }
+}
+
 
 # Stripe
 STRIPE_SECRET_KEY = env.str("STRIPE_SECRET_KEY", "")
@@ -204,7 +223,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'filters': {
         'slow_queries': {
-            '()': 'apps.utils.core.QueryLogger.SlowQueriesFilter',
+            '()': 'apps.utils.core.QueryLogger.SlowQueriesFilter'
             # 'callback': lambda record: len(record.name) > 0  # output slow queries only
         },
     },
@@ -221,12 +240,12 @@ LOGGING = {
             'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
             'backupCount': DEBUG_LOG_FILE_ROTATIONS,
             'formatter': 'default',
-            'filters': ['slow_queries'],
+            'filters': ['slow_queries']
         },
         'console': {
             'level': 'WARNING',
             'class': 'logging.StreamHandler',
-            'formatter': 'default',
+            'formatter': 'default'
         },
         'debug_files': {
             'level': 'DEBUG',
@@ -235,7 +254,7 @@ LOGGING = {
             'filename': LOG_DIRECTORY / 'debug.log',
             'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
             'backupCount': DEBUG_LOG_FILE_ROTATIONS,
-            'mode': 'a',
+            'mode': 'a'
         },
         'info_files': {
             'level': 'INFO',
@@ -244,7 +263,7 @@ LOGGING = {
             'filename': LOG_DIRECTORY / 'info.log',
             'maxBytes': INFO_LOG_FILE_SIZE * 1024 * 1024,
             'backupCount': INFO_LOG_FILE_ROTATIONS,
-            'mode': 'a',
+            'mode': 'a'
         },
         'error_files': {
             'level': 'WARNING',
@@ -253,7 +272,7 @@ LOGGING = {
             'filename': LOG_DIRECTORY / 'error.log',
             'maxBytes': ERROR_LOG_FILE_SIZE * 1024 * 1024,
             'backupCount': ERROR_LOG_FILE_ROTATIONS,
-            'mode': 'a',
+            'mode': 'a'
         },
         'request_files': {
             'level': 'DEBUG',
@@ -262,7 +281,7 @@ LOGGING = {
             'filename': LOG_DIRECTORY / 'requests.log',
             'maxBytes': DEBUG_LOG_FILE_SIZE * 1024 * 1024,
             'backupCount': DEBUG_LOG_FILE_ROTATIONS,
-            'mode': 'a',
+            'mode': 'a'
         }
     },
     'root': {'level': 'DEBUG', 'handlers': ['console', 'error_files', 'request_files', 'sql_logs']},
@@ -270,27 +289,27 @@ LOGGING = {
         'django': {
             'level': 'WARNING',
             'handlers': ['console', 'error_files'],
-            'propagate': False,
+            'propagate': False
         },
         'django.server': {
             'level': 'WARNING',
             'handlers': ['console', 'error_files'],
-            'propagate': False,
+            'propagate': False
         },
         'django.db.backends': {
             'level': 'DEBUG' if ENABLE_SQL_LOGGING else 'WARNING',
             'handlers': ['sql_logs'],
-            'propagate': False,
+            'propagate': False
         },
         'django.security.*': {
             'level': 'WARNING',
             'handlers': ['console', 'error_files'],
-            'propagate': False,
+            'propagate': False
         },
         'django.security.csrf': {
             'level': 'WARNING',
             'handlers': ['console', 'error_files'],
-            'propagate': False,
+            'propagate': False
         },
-    },
+    }
 }
