@@ -6,6 +6,7 @@ from rest_framework import generics, status, exceptions
 from ..models import Plan, Subscription
 from .serializers import PlanSerializer, SubscriptionSerializer, SubscriptionUpgradeSerializer
 
+from apps.stats.api.cache import bust_org_cache
 from apps.utils.core.Permissions import IsAuthenticated, IsOrgAdminPermission
 from apps.utils.Stripe import update_subscription_item, create_subscription, get_upcoming_invoice
 
@@ -70,6 +71,8 @@ class SubscriptionUpgradeView(APIView):
             "stripe_subscription_item_id",
             "updated_at",
         ])
+
+        bust_org_cache(str(request.user.organization_id))
 
         return Response(SubscriptionSerializer(subscription).data, status=status.HTTP_200_OK)
 

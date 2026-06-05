@@ -201,6 +201,16 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
 
 # Stripe
 STRIPE_SECRET_KEY = env.str("STRIPE_SECRET_KEY", "")

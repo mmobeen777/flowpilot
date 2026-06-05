@@ -13,8 +13,9 @@ EXCLUDED_PREFIXES = (
     root_path + "v1/invitation",
     root_path + "v1/key",
     root_path + "v1/analytics",
-    root_path + "v1/billing"
-    "/static/",
+    root_path + "v1/billing",
+    root_path + "v1/stats"
+    "/static/"
 )
 
 
@@ -51,7 +52,6 @@ class UsageMeteringMiddleware:
         if block_response:
             return block_response
 
-        # --- RUN THE VIEW ---
         response = self.get_response(request)
 
         # --- METER AFTER (only on success) ---
@@ -59,10 +59,7 @@ class UsageMeteringMiddleware:
 
         return response
 
-    # ------------------------------------------------------------------ #
-    #  Quota check                                                         #
-    # ------------------------------------------------------------------ #
-
+    #  Quota check
     def _check_quota(self, request):
         """
         Return a 429 JsonResponse if the org is over their monthly limit.
@@ -97,10 +94,7 @@ class UsageMeteringMiddleware:
 
         return None
 
-    # ------------------------------------------------------------------ #
-    #  Metering                                                            #
-    # ------------------------------------------------------------------ #
-
+    #  Metering
     def _maybe_meter(self, request, response):
         if not self._should_process(request):
             return
@@ -112,10 +106,6 @@ class UsageMeteringMiddleware:
             return
 
         increment_usage(str(request.user.organization_id))
-
-    # ------------------------------------------------------------------ #
-    #  Helper                                                              #
-    # ------------------------------------------------------------------ #
 
     def _should_process(self, request) -> bool:
         return not any(
