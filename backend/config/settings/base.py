@@ -55,7 +55,8 @@ LOCAL_APPS = [
     "apps.apikeys.apps.ApikeysConfig",
     "apps.metering.apps.MeteringConfig",
     "apps.billing.apps.BillingConfig",
-    "apps.stats.apps.StatsConfig"
+    "apps.stats.apps.StatsConfig",
+    "apps.webhooks.apps.WebhooksConfig"
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
