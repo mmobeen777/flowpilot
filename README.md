@@ -74,7 +74,7 @@ flowpilot/
     │   ├── wsgi.py
     │   └── celery.py
     └── apps/
-        ├── user/       # User, Organisation, JWT auth
+        ├── user/       # User, Organization, JWT auth
         ├── invitation/    # Invite flow
         ├── apikeys/        # API key model, custom auth backend
         ├── metering/       # Redis middleware, UsageRecord

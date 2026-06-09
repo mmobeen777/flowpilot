@@ -7,6 +7,7 @@ from ..models import Plan, Subscription
 from .serializers import PlanSerializer, SubscriptionSerializer, SubscriptionUpgradeSerializer
 
 from apps.stats.api.cache import bust_org_cache
+from apps.webhooks.api.dispatcher import fire_event
 from apps.utils.core.Permissions import IsAuthenticated, IsOrgAdminPermission
 from apps.utils.Stripe import update_subscription_item, create_subscription, get_upcoming_invoice
 
@@ -22,7 +23,7 @@ class SubscriptionDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user.organisation.subscription
+        return self.request.user.organization.subscription
 
 
 class SubscriptionUpgradeView(APIView):
@@ -33,7 +34,8 @@ class SubscriptionUpgradeView(APIView):
         serializer.is_valid(raise_exception=True)
 
         new_plan = Plan.objects.get(tier=serializer.validated_data["tier"])
-        subscription = request.user.organisation.subscription
+        subscription = request.user.organization.subscription
+        old_plan = subscription.plan
 
         if subscription.plan == new_plan:
             return exceptions.ValidationError("Already on this plan.")
@@ -72,6 +74,15 @@ class SubscriptionUpgradeView(APIView):
             "updated_at",
         ])
 
+        fire_event(
+            org=request.user.organization,
+            event_type="subscription.upgraded",
+            data={
+                "old_plan": old_plan.tier,
+                "new_plan": new_plan.tier,
+            },
+        )
+
         bust_org_cache(str(request.user.organization_id))
 
         return Response(SubscriptionSerializer(subscription).data, status=status.HTTP_200_OK)
@@ -81,7 +92,7 @@ class UpcomingInvoiceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        subscription = request.user.organisation.subscription
+        subscription = request.user.organization.subscription
         if not subscription.stripe_customer_id:
             return exceptions.ValidationError("No billing account linked.")
 

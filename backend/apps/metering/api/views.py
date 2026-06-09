@@ -44,9 +44,9 @@ class QuotaView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        org = request.user.organisation
+        org = request.user.organization
         if not org:
-            raise exceptions.ValidationError("No organisation found.")
+            raise exceptions.ValidationError("No organization found.")
 
         try:
             subscription = org.subscription

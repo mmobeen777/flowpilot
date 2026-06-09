@@ -1,4 +1,4 @@
-import logging
+import logging, json, requests
 from celery import shared_task
 from datetime import datetime, timezone, timedelta
 from django.utils import timezone as django_timezone
@@ -182,7 +182,7 @@ def generate_export(self, export_id: str):
     from apps.stats.api.exports import build_csv, build_json
 
     try:
-        export = Export.objects.select_related("organisation").get(id=export_id)
+        export = Export.objects.select_related("organization").get(id=export_id)
     except Export.DoesNotExist:
         logger.error("Export %s not found", export_id)
         return
@@ -191,7 +191,7 @@ def generate_export(self, export_id: str):
     export.save(update_fields=["status"])
 
     try:
-        org = export.organisation
+        org = export.organization
 
         if export.format == Export.Format.CSV:
             content, row_count = build_csv(org, export.date_from, export.date_to)
@@ -223,3 +223,102 @@ def generate_export(self, export_id: str):
         export.save(update_fields=["status", "error_message"])
         raise self.retry(exc=exc)
 
+
+# Exponential backoff delays in seconds for each retry attempt
+RETRY_DELAYS = [60, 300, 1800, 7200, 86400]  # 1m, 5m, 30m, 2h, 24h
+DELIVERY_TIMEOUT = 10
+@shared_task(
+    name="webhooks.deliver",
+    bind=True,
+    max_retries=len(RETRY_DELAYS),
+)
+def deliver_webhook(self, delivery_id: str):
+    from apps.webhooks.models import WebhookDelivery
+    from apps.webhooks.api.signing import build_headers
+
+    try:
+        delivery = WebhookDelivery.objects.select_related("endpoint").get(
+            id=delivery_id
+        )
+    except WebhookDelivery.DoesNotExist:
+        logger.error("WebhookDelivery %s not found", delivery_id)
+        return
+
+    endpoint = delivery.endpoint
+
+    if not endpoint.is_active:
+        delivery.status = WebhookDelivery.Status.FAILED
+        delivery.error_message = "Endpoint deactivated."
+        delivery.save(update_fields=["status", "error_message"])
+        return
+
+    body = json.dumps(delivery.payload)
+    headers = build_headers(endpoint.secret, body)
+    headers["X-FlowPilot-Event"] = delivery.event_type
+
+    delivery.attempt_count += 1
+    delivery.status = WebhookDelivery.Status.RETRYING
+    delivery.save(update_fields=["attempt_count", "status"])
+
+    try:
+        response = requests.post(
+            endpoint.url,
+            data=body,
+            headers=headers,
+            timeout=DELIVERY_TIMEOUT,
+        )
+
+        delivery.response_status_code = response.status_code
+        # Store first 500 chars of response body for debugging
+        delivery.response_body = response.text[:500]
+
+        if 200 <= response.status_code < 300:
+            delivery.status = WebhookDelivery.Status.SUCCESS
+            delivery.delivered_at = timezone.now()
+            delivery.save(update_fields=[
+                "response_status_code", "response_body",
+                "status", "delivered_at",
+            ])
+            logger.info(
+                "Webhook %s delivered to %s — HTTP %s",
+                delivery_id, endpoint.url, response.status_code,
+            )
+        else:
+            _schedule_retry(self, delivery, f"HTTP {response.status_code}")
+
+    except requests.Timeout:
+        _schedule_retry(self, delivery, "Request timed out")
+
+    except requests.RequestException as exc:
+        _schedule_retry(self, delivery, str(exc))
+
+
+def _schedule_retry(task, delivery, reason: str):
+    from apps.webhooks.models import WebhookDelivery
+
+    attempt = delivery.attempt_count
+    if attempt <= len(RETRY_DELAYS):
+        delay = RETRY_DELAYS[attempt - 1]
+        delivery.next_retry_at = timezone.now() + timedelta(seconds=delay)
+        delivery.status = WebhookDelivery.Status.RETRYING
+        delivery.error_message = reason
+        delivery.save(update_fields=[
+            "status", "error_message", "next_retry_at",
+            "response_status_code", "response_body",
+        ])
+        logger.warning(
+            "Webhook %s failed (%s) — retry in %ds",
+            delivery.id, reason, delay,
+        )
+        raise task.retry(countdown=delay)
+    else:
+        delivery.status = WebhookDelivery.Status.FAILED
+        delivery.error_message = f"Max retries exceeded. Last error: {reason}"
+        delivery.save(update_fields=[
+            "status", "error_message",
+            "response_status_code", "response_body",
+        ])
+        logger.error(
+            "Webhook %s permanently failed after %d attempts",
+            delivery.id, attempt,
+        )

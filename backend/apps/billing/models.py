@@ -49,7 +49,7 @@ class Plan(BaseModel):
 
 
 class Subscription(BaseModel):
-    """One subscription per organisation."""
+    """One subscription per organization."""
 
     class Status(models.TextChoices):
         ACTIVE = "active", "Active"

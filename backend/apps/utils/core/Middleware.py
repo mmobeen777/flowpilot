@@ -14,7 +14,8 @@ EXCLUDED_PREFIXES = (
     root_path + "v1/key",
     root_path + "v1/analytics",
     root_path + "v1/billing",
-    root_path + "v1/stats"
+    root_path + "v1/stats",
+    root_path + "v1/webhooks",
     "/static/"
 )
 
@@ -88,6 +89,11 @@ class UsageMeteringMiddleware:
 
         limit = subscription.plan.monthly_call_limit
         used = get_month_count(str(user.organization_id))
+        percent = (used / limit) * 100 if limit else 0
+
+        # Fire 80% warning once (use Redis flag to avoid spamming)
+        if 80 <= percent < 100:
+            self._maybe_fire_quota_warning(user, used, limit, percent)
 
         if used >= limit:
             raise QuotaExceeded(used=used, limit=limit, upgrade_url="https://" + root_path + "v1/billing/plans")
@@ -111,3 +117,29 @@ class UsageMeteringMiddleware:
         return not any(
             request.path.startswith(p) for p in EXCLUDED_PREFIXES
         )
+
+    def _maybe_fire_quota_warning(self, user, used, limit, percent):
+        """Fire quota_warning event once per billing period at 80%."""
+        from apps.utils.core.Counter import get_redis
+        from apps.webhooks.api.dispatcher import fire_event
+
+        try:
+            r = get_redis()
+            from django.utils import timezone
+            month = timezone.now().strftime("%Y-%m")
+            flag_key = f"org:{user.organization_id}:quota_warned:{month}"
+            # SETNX — only sets if key doesn't exist (fires once per month)
+            if r.setnx(flag_key, 1):
+                r.expire(flag_key, 60 * 60 * 24 * 35)  # 35 days TTL
+
+                fire_event(
+                    org=user.organization,
+                    event_type="usage.quota_warning",
+                    data={
+                        "used": used,
+                        "limit": limit,
+                        "percent": round(percent, 1),
+                    },
+                )
+        except Exception:
+            pass  # Never let this crash a real request

@@ -15,7 +15,7 @@ from .serializers import DailyUsageSerializer, UsageSummarySerializer, QuotaTren
 
 
 def _get_org(request):
-    return request.user.organisation
+    return request.user.organization
 
 
 class UsageSummaryView(APIView):
@@ -145,7 +145,7 @@ class ExportListCreateView(APIView):
 
     def get(self, request):
         exports = Export.objects.filter(
-            organisation=request.user.organisation
+            organization=request.user.organization
         ).exclude(status=Export.Status.FAILED)
 
         serializer = ExportSerializer(
@@ -158,7 +158,7 @@ class ExportListCreateView(APIView):
         serializer.is_valid(raise_exception=True)
 
         export = Export.objects.create(
-            organisation=request.user.organisation,
+            organization=request.user.organization,
             requested_by=request.user,
             format=serializer.validated_data["format"],
             date_from=serializer.validated_data["date_from"],
@@ -180,7 +180,7 @@ class ExportDetailView(APIView):
         try:
             export = Export.objects.get(
                 id=pk,
-                organisation=request.user.organisation,
+                organization=request.user.organization,
             )
         except Export.DoesNotExist:
             return Response({"detail": "Not found."}, status=404)
@@ -197,7 +197,7 @@ class ExportDownloadView(APIView):
         try:
             export = Export.objects.get(
                 id=pk,
-                organisation=request.user.organisation,
+                organization=request.user.organization,
             )
         except Export.DoesNotExist:
             return Response({"detail": "Not found."}, status=404)

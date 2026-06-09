@@ -27,6 +27,7 @@ URL_API_KEY = APP_VERSION1 + "/key"
 URL_METERING = APP_VERSION1 + "/analytics"
 URL_BILLING = APP_VERSION1 + "/billing"
 URL_STATS = APP_VERSION1 + "/stats"
+URL_WEBHOOKS = APP_VERSION1 + "/webhooks"
 
 
 urlpatterns = [
@@ -37,4 +38,5 @@ urlpatterns = [
     path(ROOT_URL + URL_METERING, include("apps.metering.api.urls")),
     path(ROOT_URL + URL_BILLING, include("apps.billing.api.urls")),
     path(ROOT_URL + URL_STATS, include("apps.stats.api.urls")),
+    path(ROOT_URL + URL_WEBHOOKS, include("apps.webhooks.api.urls")),
 ]
