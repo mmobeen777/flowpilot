@@ -1,0 +1,16 @@
+{% extends "notifications/base.html" %}
+{% block content %}
+<h2>You've used {{ percent }}% of your monthly quota</h2>
+<div class="warning">
+  <p><strong>{{ used|floatformat:"0" }} of {{ limit|floatformat:"0" }} calls used</strong> this billing period.</p>
+</div>
+<p>Your organisation <strong>{{ org_name }}</strong> is approaching its monthly API call limit on the <strong>{{ plan_name }}</strong> plan.</p>
+<p>Once you reach 100%, all API calls will return <code>429 Too Many Requests</code> until your quota resets or you upgrade.</p>
+<a href="{{ upgrade_url }}" class="cta">Upgrade Plan</a>
+<div class="meta">
+  <p><strong>Organisation:</strong> {{ org_name }}</p>
+  <p><strong>Current plan:</strong> {{ plan_name }}</p>
+  <p><strong>Calls used:</strong> {{ used|floatformat:"0" }} / {{ limit|floatformat:"0" }}</p>
+  <p><strong>Usage:</strong> {{ percent }}%</p>
+</div>
+{% endblock %}

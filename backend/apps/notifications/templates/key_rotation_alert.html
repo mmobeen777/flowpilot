@@ -1,0 +1,13 @@
+{% extends "notifications/base.html" %}
+{% block content %}
+<h2>API key rotated</h2>
+<p>An API key in your organisation <strong>{{ org_name }}</strong> was rotated{% if rotated_by %} by <strong>{{ rotated_by }}</strong>{% endif %}.</p>
+<div class="meta">
+  <p><strong>Key name:</strong> {{ key_name }}</p>
+  <p><strong>Old prefix:</strong> <code>{{ old_prefix }}...</code></p>
+  <p><strong>Rotated by:</strong> {{ rotated_by }}</p>
+  <p><strong>Time:</strong> {{ rotated_at }}</p>
+</div>
+<p>If you did not authorise this rotation, review your team's access immediately.</p>
+<a href="{{ dashboard_url }}" class="cta">Review API Keys</a>
+{% endblock %}

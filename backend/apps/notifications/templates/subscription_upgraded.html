@@ -1,0 +1,14 @@
+{% extends "notifications/base.html" %}
+{% block content %}
+<h2>Plan upgraded to {{ new_plan }}</h2>
+<div class="success">
+  <p>Your organisation is now on the <strong>{{ new_plan }}</strong> plan.</p>
+</div>
+<p>Hi {{ full_name }}, your subscription for <strong>{{ org_name }}</strong> has been upgraded successfully.</p>
+<div class="meta">
+  <p><strong>Previous plan:</strong> {{ old_plan }}</p>
+  <p><strong>New plan:</strong> {{ new_plan }}</p>
+  <p><strong>Monthly limit:</strong> {{ monthly_limit }}</p>
+  <p><strong>Max API keys:</strong> {{ max_api_keys }}</p>
+</div>
+{% endblock %}
