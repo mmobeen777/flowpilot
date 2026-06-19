@@ -1,7 +1,7 @@
 {% extends "notifications/base.html" %}
 {% block content %}
 <h2>API key rotated</h2>
-<p>An API key in your organisation <strong>{{ org_name }}</strong> was rotated{% if rotated_by %} by <strong>{{ rotated_by }}</strong>{% endif %}.</p>
+<p>An API key in your organization <strong>{{ org_name }}</strong> was rotated{% if rotated_by %} by <strong>{{ rotated_by }}</strong>{% endif %}.</p>
 <div class="meta">
   <p><strong>Key name:</strong> {{ key_name }}</p>
   <p><strong>Old prefix:</strong> <code>{{ old_prefix }}...</code></p>

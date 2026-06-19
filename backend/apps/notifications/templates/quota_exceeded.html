@@ -4,11 +4,11 @@
 <div class="danger">
   <p><strong>API calls are now being blocked</strong> for {{ org_name }}.</p>
 </div>
-<p>Your organisation has reached its <strong>{{ limit|floatformat:"0" }} call limit</strong> on the <strong>{{ plan_name }}</strong> plan. All further API calls will return <code>429 Too Many Requests</code>.</p>
+<p>Your organization has reached its <strong>{{ limit|floatformat:"0" }} call limit</strong> on the <strong>{{ plan_name }}</strong> plan. All further API calls will return <code>429 Too Many Requests</code>.</p>
 <p>Upgrade your plan immediately to restore API access.</p>
 <a href="{{ upgrade_url }}" class="cta">Upgrade Now</a>
 <div class="meta">
-  <p><strong>Organisation:</strong> {{ org_name }}</p>
+  <p><strong>Organization:</strong> {{ org_name }}</p>
   <p><strong>Calls used:</strong> {{ used|floatformat:"0" }} / {{ limit|floatformat:"0" }}</p>
   <p><strong>Quota resets:</strong> Next billing period</p>
 </div>

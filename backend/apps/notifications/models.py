@@ -32,7 +32,7 @@ class Notification(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
                              related_name="notifications")
 
-    organisation = models.ForeignKey("user.Organization", on_delete=models.SET_NULL, null=True, blank=True,
+    organization = models.ForeignKey("user.Organization", on_delete=models.SET_NULL, null=True, blank=True,
                                      related_name="notifications")
 
     sent_at = models.DateTimeField(null=True, blank=True)
@@ -42,7 +42,7 @@ class Notification(BaseModel):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["recipient_email", "notification_type"]),
-            models.Index(fields=["organisation", "created_at"]),
+            models.Index(fields=["organization", "created_at"]),
         ]
 
     def __str__(self):
