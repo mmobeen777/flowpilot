@@ -190,6 +190,8 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 REDIS_URL = env.str("REDIS_URL")
 
+RESEND_API_KEY = env.str("RESEND_API_KEY")
+
 CELERY_BEAT_SCHEDULE = {
     "flush-usage-and-report-nightly": {
         "task": "flush_usage_and_report",
