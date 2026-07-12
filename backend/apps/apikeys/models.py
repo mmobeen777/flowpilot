@@ -1,5 +1,6 @@
 import uuid
 import hashlib
+import ipaddress
 import secrets
 from django.db import models
 from django.conf import settings
@@ -20,6 +21,13 @@ class APIKey(BaseModel):
     last_used_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
+    allowed_ips = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of IPs / CIDR ranges this key may be used from. "
+                  "Empty means no restriction.",
+    )
+
     class Meta:
         db_table = "api_keys"
         ordering = ["-created_at"]
@@ -28,7 +36,7 @@ class APIKey(BaseModel):
         return f"{self.name} ({self.prefix}...)"
 
     @classmethod
-    def create_key(cls, organization, created_by, name, expires_at=None):
+    def create_key(cls, organization, created_by, name, expires_at=None, allowed_ips=None):
         """
         Generate a new key, store its hash, and return
         (instance, raw_key). raw_key is shown once and discarded.
@@ -44,8 +52,37 @@ class APIKey(BaseModel):
             prefix=prefix,
             hashed_key=hashed,
             expires_at=expires_at,
+            allowed_ips=allowed_ips or [],
         )
         return instance, raw_key
+
+    def is_ip_allowed(self, ip: str) -> bool:
+        """
+        Return True if `ip` is permitted to use this key.
+
+        An empty allowed_ips list means the key is unrestricted.
+        Each entry may be a single address (e.g. "203.0.113.7") or a
+        CIDR range (e.g. "203.0.113.0/24"), IPv4 or IPv6.
+        """
+        if not self.allowed_ips:
+            return True
+
+        if not ip:
+            return False
+
+        try:
+            client = ipaddress.ip_address(ip)
+        except ValueError:
+            return False
+
+        for entry in self.allowed_ips:
+            try:
+                if client in ipaddress.ip_network(entry, strict=False):
+                    return True
+            except ValueError:
+                continue  # Skip malformed entries rather than failing open
+
+        return False
 
     @classmethod
     def authenticate(cls, raw_key: str):

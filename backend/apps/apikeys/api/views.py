@@ -41,7 +41,8 @@ class APIKeyViewSet(viewsets.ModelViewSet):
 
         instance, raw_key = APIKey.create_key(organization=request.user.organization, created_by=request.user,
                                               name=serializer.validated_data["name"],
-                                              expires_at=serializer.validated_data.get("expires_at"))
+                                              expires_at=serializer.validated_data.get("expires_at"),
+                                              allowed_ips=serializer.validated_data.get("allowed_ips"))
 
         instance.raw_key = raw_key
 
@@ -99,7 +100,8 @@ class APIKeyViewSet(viewsets.ModelViewSet):
 
         new_instance, raw_key = APIKey.create_key(organization=request.user.organization, created_by=request.user,
                                                   name=f"{old_key.name} (rotated {timezone.now().strftime('%Y-%m-%d')})",
-                                                  expires_at=old_key.expires_at)
+                                                  expires_at=old_key.expires_at,
+                                                  allowed_ips=old_key.allowed_ips)
         new_instance.raw_key = raw_key
 
         return Response(APIKeyCreatedSerializer(new_instance).data, status=status.HTTP_201_CREATED)
